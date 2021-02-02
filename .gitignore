@@ -1,0 +1,11 @@
+# Object files
+
+/*.o
+
+# Executable files
+
+/*.out
+
+# Misc
+
+/main

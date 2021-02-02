@@ -1,4 +1,12 @@
 #include "shell.h"
+#include "builtin.h"
+
+builtinCommands builtins[] = {
+    {"cd", changeDirectory},
+    {"pwd", presentWorkingDirectory},
+    {"exit", exitShell},
+    {"help", displayHelp},
+};
 
 char *readCommand()
 {
@@ -46,6 +54,15 @@ int executeCommand(char **args)
   if (args[0] == NULL)
   {
     return 1;
+  }
+
+  for (i = 0; i < (sizeof(builtins) / sizeof(builtinCommands)); ++i)
+  {
+
+    if (strcmp(args[0], builtins[i].name) == 0)
+    {
+      return builtins[i].function(args);
+    }
   }
 
   pid = fork();

@@ -7,3 +7,5 @@
 char *readCommand();
 
 char **splitCommand(char *command);
+
+int executeCommand(char **args);

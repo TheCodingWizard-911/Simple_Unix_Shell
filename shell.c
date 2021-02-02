@@ -36,3 +36,41 @@ char **splitCommand(char *command)
 
   return tokens;
 }
+
+int executeCommand(char **args)
+{
+  pid_t pid, wpid;
+
+  int i = 0, status;
+
+  if (args[0] == NULL)
+  {
+    return 1;
+  }
+
+  pid = fork();
+  if (pid == 0)
+  {
+    // Child process
+    if (execvp(args[0], args) == -1)
+    {
+      perror("Error executing");
+    }
+    exit(EXIT_FAILURE);
+  }
+  else if (pid < 0)
+  {
+    perror("Error in forking");
+    exit(EXIT_FAILURE);
+  }
+  else
+  {
+    // Parent process
+    do
+    {
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
+
+  return 1;
+}

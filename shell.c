@@ -91,3 +91,67 @@ int executeCommand(char **args)
 
   return 1;
 }
+
+int executePipedCommands(char **firstCommandArgs, char **secondCommandArgs)
+{
+  int pfd[2];
+  pid_t firstPID, secondPID;
+
+  if (pipe(pfd) < 0)
+  {
+    perror("Error");
+    return 0;
+  }
+
+  firstPID = fork();
+  if (firstPID == 0)
+  {
+    dup2(pfd[1], STDOUT_FILENO);
+    close(pfd[0]);
+    if (execvp(firstCommandArgs[0], firstCommandArgs) == -1)
+    {
+      perror("Error executing");
+    }
+    exit(EXIT_FAILURE);
+  }
+  else if (firstPID < 0)
+  {
+    perror("Error in forking");
+    exit(EXIT_FAILURE);
+  }
+
+  secondPID = fork();
+
+  if (secondPID == 0)
+  {
+    dup2(pfd[0], STDIN_FILENO);
+    close(pfd[1]);
+    if (execvp(secondCommandArgs[0], secondCommandArgs) == -1)
+    {
+      perror("Error executing");
+    }
+    exit(EXIT_FAILURE);
+  }
+  else if (secondPID < 0)
+  {
+    perror("Error in forking");
+    exit(EXIT_FAILURE);
+  }
+
+  close(pfd[0]);
+  close(pfd[1]);
+
+  int firstStatus, secondStatus;
+
+  do
+  {
+    waitpid(firstPID, &firstStatus, WUNTRACED);
+  } while (!WIFEXITED(firstStatus) && !WIFSIGNALED(firstStatus));
+
+  do
+  {
+    waitpid(secondPID, &secondStatus, WUNTRACED);
+  } while (!WIFEXITED(secondStatus) && !WIFSIGNALED(secondStatus));
+
+  return 1;
+}

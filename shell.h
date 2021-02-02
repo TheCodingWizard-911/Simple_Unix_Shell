@@ -9,3 +9,5 @@ char *readCommand();
 char **splitCommand(char *command);
 
 int executeCommand(char **args);
+
+int executePipedCommands(char **firstCommand, char **secondCommand);

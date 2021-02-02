@@ -9,8 +9,27 @@ int main()
   {
     printf("\n$_> ");
     command = readCommand();
-    args = splitCommand(command);
-    status = executeCommand(args);
+
+    if (strstr(command, "|"))
+    {
+
+      char *firstCommand = strtok(command, "|");
+      char *secondCommand = strtok(NULL, "\t\r\n");
+
+      char **firstCommandArguments = splitCommand(firstCommand);
+      char **secondCommandArguments = splitCommand(secondCommand);
+
+      if (firstCommandArguments[0] != NULL && secondCommandArguments[0] != NULL)
+      {
+        status = executePipedCommands(firstCommandArguments, secondCommandArguments);
+      }
+    }
+
+    else
+    {
+      args = splitCommand(command);
+      status = executeCommand(args);
+    }
 
     free(command);
     free(args);
